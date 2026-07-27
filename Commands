@@ -1,0 +1,14 @@
+az login // Login to the Azure portal with Command Line
+az group create --name rg-gp-static-website --location uksouth // Create Resource Group by specifying location
+az deployment group create  --resource-group rg-gp-static-website  --template-file Modules/01-static-website.bicep // Deploy the Bicep file
+az storage blob service-properties update --account-name stzeqdbl4jf7eoo --auth-mode login --static-website  --index-document index.html --404-document 404.html // Enable static website hosting on Azure Storage account
+az storage account show  --name stzeqdbl4jf7eoo --resource-group rg-gp-static-website --query "primaryEndpoints.web" // Display the primary endpoint of the storage account
+
+
+Index.html (Content)
+
+<!DOCTYPE html> <html> <head><title>Product Landing Page</title></head> <body> <h1>Version 1 - Landing Page</h1> <p>Welcome to our product page. This is the initial published version.</p> </body> </html>
+
+404.html
+
+<!DOCTYPE html> <html> <head><title>Page Not Found</title></head> <body> <h1>404 - Page Not Found</h1> <p>The page you requested does not exist. Return to the <a href="/">home page</a>.</p> </body> </html>
