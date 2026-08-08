@@ -1,3 +1,5 @@
+//01-static-website
+
 az login // Login to the Azure portal with Command Line
 az group create --name rg-gp-static-website --location uksouth // Create Resource Group by specifying location
 az deployment group create  --resource-group rg-gp-static-website  --template-file Modules/01-static-website.bicep // Deploy the Bicep file
@@ -12,3 +14,10 @@ Index.html (Content)
 404.html
 
 <!DOCTYPE html> <html> <head><title>Page Not Found</title></head> <body> <h1>404 - Page Not Found</h1> <p>The page you requested does not exist. Return to the <a href="/">home page</a>.</p> </body> </html>
+
+
+//02-resourcelock-tags
+
+az login // Login to the Azure portal with Command Line
+az group create --name rg-gp-vmlockandtag --location uksouth
+az deployment group create  --resource-group rg-gp-vmlockandtag  --template-file Modules/02-resourcelock-tags.bicep // Deploy the Bicep file
