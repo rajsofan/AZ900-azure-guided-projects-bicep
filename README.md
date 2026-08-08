@@ -1,6 +1,6 @@
 # AZ900 Azure Guided Projects - Bicep
 
-This repository contains Azure Infrastructure as Code (IaC) templates written in **Bicep** for AZ900 guided projects. It demonstrates how to deploy Azure resources declaratively using Bicep templates.
+This repository contains Azure Infrastructure as Code (IaC) templates written in **Bicep** for AZ900 guided projects. It demonstrates how to deploy Azure resources declaratively using Bicep templates and includes several example modules for common scenarios.
 
 ## 📋 Prerequisites
 
@@ -25,7 +25,7 @@ az group create --name rg-gp-static-website --location uksouth
 Replace `uksouth` with your desired Azure region. Available regions include:
 - `eastus`, `westus`, `northeurope`, `westeurope`, `uksouth`, `Southeast Asia`, etc.
 
-### 3. Deploy the Bicep Template
+### 3. Deploy a Bicep Template (Module 1: Static Website)
 ```bash
 az deployment group create \
   --resource-group rg-gp-static-website \
@@ -52,14 +52,18 @@ az storage account show \
 ```
 This displays the public URL of your static website.
 
+---
+
 ## 📁 Repository Structure
 
 ```
 AZ900-azure-guided-projects-bicep/
-├── README.md                      # Documentation (this file)
-├── Commands                       # CLI commands reference
+├── README.md                         # Documentation (this file)
+├── .gitignore
+├── Commands                          # CLI commands reference
 └── Modules/
-    └── 01-static-website.bicep    # Bicep template for static website
+    ├── 01-static-website.bicep       # Bicep template for static website
+    └── 02-resourcelocks-tags.bicep   # Bicep template for VM with resource locks & tags
 ```
 
 ## 🏗️ Project Modules
@@ -93,9 +97,65 @@ az deployment group create \
   --parameters StorageaccountName=mystorageaccount location=uksouth
 ```
 
-## 📄 Web Content Setup
+---
 
-After deploying the infrastructure, upload your web files:
+### Module 2: VM with Resource Locks & Tags (02-resourcelocks-tags.bicep)
+
+This module deploys a simple Windows virtual machine along with networking resources and applies tags and a delete lock to the VM.
+
+**Resources Created:**
+- Virtual Network and Subnet
+- Network Security Group (NSG) with an RDP rule
+- Public IP Address (Static, Standard SKU)
+- Network Interface (NIC)
+- Virtual Machine (Windows Server 2022)
+- Resource Lock (level: CanNotDelete) scoped to the VM
+- Tags applied to VNet and VM (Department, Purpose)
+
+**Key Behaviour / Notes:**
+- The VM admin password is defined as a secure parameter (no plaintext in templates recommended when deploying).
+- The delete lock prevents accidental deletion of the VM resource.
+
+**Parameters (with defaults shown in the module):**
+- `vnetName` (string): Name of the virtual network (default: `project-vnet1`)
+- `location` (string): Location for resources (default: resource group location)
+- `vnetDepartmentTag` (string): Department tag value for the vnet (default: `IT`)
+- `vnetAddressPrefix` (string): Address space for VNet (default: `10.0.0.0/16`)
+- `subentName` (string): Subnet name (default: `subnet-1`)
+- `subnetAddressPrefix` (string): Subnet address prefix (default: `10.0.0.0/24`)
+- `vmName` (string): Virtual machine name (default: `VM1`)
+- `vmSize` (string): VM size (default: `Standard_B2S`)
+- `adminusername` (string): Administrator username (default: `adminuser`)
+- `adminPassword` (secure string): Administrator password (no default)
+- `vmDepartmentTag` (string): Department tag for VM (default: `Customer Service`)
+- `vmpurposeTag` (string): Purpose tag for VM (default: `FTP Server`)
+- `vmLockName` (string): Name of the delete lock applied to the VM (default: `VM-delete-Lock`)
+
+**Outputs:**
+- `vmName`: Name of the created VM
+- `vnetName`: Name of the created VNet
+- `publicIpAddress`: Public IP address assigned to the VM
+- `vmResourceID`: Resource ID of the VM
+
+**Example Deployment:**
+```bash
+# Create resource group
+az group create --name rg-gp-vmlockandtag --location uksouth
+
+# Deploy the module (you will be prompted for secure parameters unless passed)
+az deployment group create \
+  --resource-group rg-gp-vmlockandtag \
+  --template-file Modules/02-resourcelocks-tags.bicep \
+  --parameters adminPassword='<YourSecurePassword>' vmName=myvmname location=uksouth
+```
+
+> Security note: For production or shared use, consider using Azure Key Vault or parameter files to provide secrets (adminPassword) instead of passing them directly on the CLI.
+
+---
+
+## 📄 Web Content Setup (for Module 1)
+
+After deploying the infrastructure for the static website, upload your web files:
 
 ### Index Page (index.html)
 ```html
@@ -144,15 +204,15 @@ az storage blob upload \
 
 ## 🔧 Common Commands
 
-See the `Commands` file for quick reference of all CLI commands used in this project.
+See the `Commands` file for a quick reference of all CLI commands used in this project (both Module 01 and Module 02 are listed there).
 
 ## 💡 Key Features
 
 ✅ **Infrastructure as Code**: All resources defined declaratively in Bicep  
 ✅ **Reusable Modules**: Modular design for easy scaling  
-✅ **Best Practices**: HTTPS-only, TLS 1.2 minimum, Azure best practices  
+✅ **Best Practices**: HTTPS-only, TLS 1.2 minimum where applicable  
 ✅ **Cost Efficient**: Uses Standard_LRS for cost-effective storage  
-✅ **Global Uniqueness**: Auto-generated storage account names to avoid conflicts  
+✅ **Global Uniqueness**: Auto-generated storage account names to avoid conflicts
 
 ## 📚 Learning Resources
 
@@ -166,11 +226,14 @@ See the `Commands` file for quick reference of all CLI commands used in this pro
 To avoid charges, delete resources when no longer needed:
 
 ```bash
-# Delete the entire resource group and all resources within it
+# Delete the static website resource group
 az group delete --name rg-gp-static-website --yes --no-wait
+
+# Delete the VM/lab resource group
+az group delete --name rg-gp-vmlockandtag --yes --no-wait
 ```
 
-⚠️ **Warning**: This operation is irreversible and will delete all resources in the resource group.
+⚠️ **Warning**: These operations are irreversible and will delete all resources in the resource group.
 
 ## 📝 Notes
 
@@ -189,5 +252,5 @@ This project is provided as-is for educational purposes.
 
 ---
 
-**Last Updated**: July 2026  
+**Last Updated**: August 2026  
 **Bicep Version**: Supported with Azure CLI 2.3.0+
