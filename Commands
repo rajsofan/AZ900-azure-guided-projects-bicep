@@ -21,3 +21,9 @@ Index.html (Content)
 az login // Login to the Azure portal with Command Line
 az group create --name rg-gp-vmlockandtag --location uksouth
 az deployment group create  --resource-group rg-gp-vmlockandtag  --template-file Modules/02-resourcelock-tags.bicep // Deploy the Bicep file
+
+//02-resourcelock-tags
+
+az login // Login to the Azure portal with Command Line
+az group create --name rg-gp-vmlockandtag --location uksouth
+az deployment group create  --resource-group rg-gp-vmlockandtag  --template-file Modules/02-resourcelocks-tags.bicep
